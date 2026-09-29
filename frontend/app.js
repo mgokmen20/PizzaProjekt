@@ -5,6 +5,14 @@ const translations = {
     navMenu: 'Menü',
     navAbout: 'Über uns',
     navContact: 'Kontakt',
+    cartLabel: 'Warenkorb',
+    cartTitle: 'Dein Warenkorb',
+    emptyCart: 'Dein Warenkorb ist leer.',
+    total: 'Gesamt',
+    closeCart: 'Warenkorb schließen',
+    decreaseQuantity: 'Menge verringern',
+    increaseQuantity: 'Menge erhöhen',
+    remove: 'Entfernen',
     eyebrow: 'Frisch. Einfach. Italienisch.',
     heroTitle: 'Deine Lieblingspizza, frisch aus dem Ofen.',
     heroDescription: 'Handgemachte Pizza mit sorgfältig ausgewählten Zutaten und echtem italienischem Geschmack.',
@@ -24,6 +32,14 @@ const translations = {
     navMenu: 'Menu',
     navAbout: 'About',
     navContact: 'Contact',
+    cartLabel: 'Cart',
+    cartTitle: 'Your Cart',
+    emptyCart: 'Your cart is empty.',
+    total: 'Total',
+    closeCart: 'Close cart',
+    decreaseQuantity: 'Decrease quantity',
+    increaseQuantity: 'Increase quantity',
+    remove: 'Remove',
     eyebrow: 'Fresh. Simple. Italian.',
     heroTitle: 'Your favorite pizza, fresh from the oven.',
     heroDescription: 'Handmade pizza with carefully selected ingredients and authentic Italian flavor.',
@@ -53,6 +69,18 @@ const elements = {
   navMenu: document.querySelector('#nav-menu'),
   navAbout: document.querySelector('#nav-about'),
   navContact: document.querySelector('#nav-contact'),
+  cartButton: document.querySelector('#cart-button'),
+  cartLabel: document.querySelector('#cart-label'),
+  cartCount: document.querySelector('#cart-count'),
+  cartDrawerContainer: document.querySelector('#cart-drawer-container'),
+  cartBackdrop: document.querySelector('#cart-backdrop'),
+  cartDrawer: document.querySelector('#cart-drawer'),
+  cartClose: document.querySelector('#cart-close'),
+  cartTitle: document.querySelector('#cart-title'),
+  cartEmpty: document.querySelector('#cart-empty'),
+  cartItems: document.querySelector('#cart-items'),
+  cartTotalLabel: document.querySelector('#cart-total-label'),
+  cartTotal: document.querySelector('#cart-total'),
   eyebrow: document.querySelector('#eyebrow'),
   heroTitle: document.querySelector('#hero-title'),
   heroDescription: document.querySelector('#hero-description'),
@@ -71,7 +99,9 @@ const elements = {
 
 let currentLanguage = 'de';
 let pizzas = [];
+let cart = [];
 let hasLoadingError = false;
+let lastFocusedElement = null;
 
 function updateStaticContent() {
   const content = translations[currentLanguage];
@@ -80,6 +110,13 @@ function updateStaticContent() {
   elements.navMenu.textContent = content.navMenu;
   elements.navAbout.textContent = content.navAbout;
   elements.navContact.textContent = content.navContact;
+  elements.cartLabel.textContent = content.cartLabel;
+  elements.cartTitle.textContent = content.cartTitle;
+  elements.cartEmpty.textContent = content.emptyCart;
+  elements.cartTotalLabel.textContent = content.total;
+  elements.cartButton.setAttribute('aria-label', `${content.cartLabel}: ${getCartItemCount()}`);
+  elements.cartClose.setAttribute('aria-label', content.closeCart);
+  elements.cartBackdrop.setAttribute('aria-label', content.closeCart);
   elements.eyebrow.textContent = content.eyebrow;
   elements.heroTitle.textContent = content.heroTitle;
   elements.heroDescription.textContent = content.heroDescription;
@@ -107,6 +144,154 @@ function getPizzaDescription(pizza) {
   }
 
   return pizza.description;
+}
+
+function formatPrice(value) {
+  return `CHF ${Number(value).toFixed(2)}`;
+}
+
+function getCartItemCount() {
+  return cart.reduce((total, item) => total + item.quantity, 0);
+}
+
+function addToCart(pizza) {
+  const existingItem = cart.find((item) => String(item.id) === String(pizza.id));
+
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.push({
+      id: pizza.id,
+      name: pizza.name,
+      price: Number(pizza.price),
+      quantity: 1,
+    });
+  }
+
+  renderCart();
+}
+
+function adjustCartItemQuantity(itemId, change) {
+  const item = cart.find((cartItem) => String(cartItem.id) === String(itemId));
+
+  if (!item) {
+    return;
+  }
+
+  item.quantity += change;
+
+  if (item.quantity <= 0) {
+    removeCartItem(itemId);
+    return;
+  }
+
+  renderCart();
+}
+
+function removeCartItem(itemId) {
+  cart = cart.filter((item) => String(item.id) !== String(itemId));
+  renderCart();
+}
+
+function createCartItem(item) {
+  const content = translations[currentLanguage];
+  const cartItem = document.createElement('article');
+  cartItem.className = 'rounded-2xl border border-stone-200 p-4';
+
+  const itemHeader = document.createElement('div');
+  itemHeader.className = 'flex items-start justify-between gap-4';
+
+  const itemDetails = document.createElement('div');
+
+  const itemName = document.createElement('h3');
+  itemName.className = 'font-bold text-stone-900';
+  itemName.textContent = item.name;
+
+  const itemPrice = document.createElement('p');
+  itemPrice.className = 'mt-1 text-sm text-stone-500';
+  itemPrice.textContent = formatPrice(item.price);
+
+  const removeButton = document.createElement('button');
+  removeButton.type = 'button';
+  removeButton.className = 'text-sm font-bold text-red-600 transition hover:text-red-700';
+  removeButton.textContent = content.remove;
+  removeButton.setAttribute('aria-label', `${content.remove}: ${item.name}`);
+  removeButton.addEventListener('click', () => removeCartItem(item.id));
+
+  const quantityRow = document.createElement('div');
+  quantityRow.className = 'mt-4 flex items-center justify-between';
+
+  const quantityControls = document.createElement('div');
+  quantityControls.className = 'flex items-center rounded-full border border-stone-300 bg-white';
+
+  const decreaseButton = document.createElement('button');
+  decreaseButton.type = 'button';
+  decreaseButton.className = 'grid size-9 place-items-center rounded-full text-lg transition hover:bg-stone-100';
+  decreaseButton.textContent = '−';
+  decreaseButton.setAttribute('aria-label', `${content.decreaseQuantity}: ${item.name}`);
+  decreaseButton.addEventListener('click', () => adjustCartItemQuantity(item.id, -1));
+
+  const quantity = document.createElement('span');
+  quantity.className = 'min-w-9 text-center text-sm font-bold';
+  quantity.textContent = item.quantity;
+
+  const increaseButton = document.createElement('button');
+  increaseButton.type = 'button';
+  increaseButton.className = 'grid size-9 place-items-center rounded-full text-lg transition hover:bg-stone-100';
+  increaseButton.textContent = '+';
+  increaseButton.setAttribute('aria-label', `${content.increaseQuantity}: ${item.name}`);
+  increaseButton.addEventListener('click', () => adjustCartItemQuantity(item.id, 1));
+
+  const itemTotal = document.createElement('p');
+  itemTotal.className = 'font-black text-stone-900';
+  itemTotal.textContent = formatPrice(item.price * item.quantity);
+
+  itemDetails.append(itemName, itemPrice);
+  itemHeader.append(itemDetails, removeButton);
+  quantityControls.append(decreaseButton, quantity, increaseButton);
+  quantityRow.append(quantityControls, itemTotal);
+  cartItem.append(itemHeader, quantityRow);
+
+  return cartItem;
+}
+
+function renderCart() {
+  const itemCount = getCartItemCount();
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  elements.cartCount.textContent = itemCount;
+  elements.cartButton.setAttribute('aria-label', `${translations[currentLanguage].cartLabel}: ${itemCount}`);
+  elements.cartItems.replaceChildren(...cart.map(createCartItem));
+  elements.cartEmpty.classList.toggle('hidden', cart.length > 0);
+  elements.cartTotal.textContent = formatPrice(total);
+}
+
+function openCart() {
+  lastFocusedElement = document.activeElement;
+  elements.cartDrawerContainer.removeAttribute('inert');
+  elements.cartDrawerContainer.classList.remove('pointer-events-none');
+  elements.cartDrawerContainer.setAttribute('aria-hidden', 'false');
+  elements.cartBackdrop.classList.remove('opacity-0');
+  elements.cartBackdrop.classList.add('opacity-100');
+  elements.cartDrawer.classList.remove('translate-x-full');
+  elements.cartButton.setAttribute('aria-expanded', 'true');
+  document.body.classList.add('overflow-hidden');
+  elements.cartClose.focus();
+}
+
+function closeCart() {
+  if (lastFocusedElement) {
+    lastFocusedElement.focus();
+  }
+
+  elements.cartDrawerContainer.classList.add('pointer-events-none');
+  elements.cartDrawerContainer.setAttribute('aria-hidden', 'true');
+  elements.cartDrawerContainer.setAttribute('inert', '');
+  elements.cartBackdrop.classList.add('opacity-0');
+  elements.cartBackdrop.classList.remove('opacity-100');
+  elements.cartDrawer.classList.add('translate-x-full');
+  elements.cartButton.setAttribute('aria-expanded', 'false');
+  document.body.classList.remove('overflow-hidden');
 }
 
 function createPizzaCard(pizza) {
@@ -139,13 +324,13 @@ function createPizzaCard(pizza) {
 
   const price = document.createElement('p');
   price.className = 'text-xl font-black text-red-600';
-  price.textContent = `CHF ${Number(pizza.price).toFixed(2)}`;
+  price.textContent = formatPrice(pizza.price);
 
   const button = document.createElement('button');
   button.type = 'button';
-  button.disabled = true;
-  button.className = 'cursor-not-allowed rounded-full bg-stone-200 px-4 py-2.5 text-sm font-bold text-stone-500';
+  button.className = 'rounded-full bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2';
   button.textContent = translations[currentLanguage].addToCart;
+  button.addEventListener('click', () => addToCart(pizza));
 
   actionRow.append(price, button);
   content.append(title, description, actionRow);
@@ -190,6 +375,7 @@ elements.languageButtons.forEach((button) => {
   button.addEventListener('click', () => {
     currentLanguage = button.dataset.language;
     updateStaticContent();
+    renderCart();
 
     if (pizzas.length > 0) {
       renderPizzas();
@@ -199,5 +385,16 @@ elements.languageButtons.forEach((button) => {
   });
 });
 
+elements.cartButton.addEventListener('click', openCart);
+elements.cartClose.addEventListener('click', closeCart);
+elements.cartBackdrop.addEventListener('click', closeCart);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && elements.cartButton.getAttribute('aria-expanded') === 'true') {
+    closeCart();
+  }
+});
+
 updateStaticContent();
+renderCart();
 loadPizzas();

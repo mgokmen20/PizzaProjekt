@@ -23,12 +23,49 @@
         <a id="nav-contact" href="#contact" class="transition hover:text-red-600">Kontakt</a>
       </div>
 
-      <div class="order-2 flex rounded-full border border-stone-300 bg-white p-1 shadow-sm sm:order-3" aria-label="Language selection">
-        <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="de" aria-pressed="true">DE</button>
-        <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="en" aria-pressed="false">EN</button>
+      <div class="order-2 flex items-center gap-3 sm:order-3">
+        <button id="cart-button" type="button" class="relative flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-600" aria-controls="cart-drawer" aria-expanded="false">
+          <svg class="size-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3h2l2.4 11.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6"/>
+            <circle cx="10" cy="20" r="1"/>
+            <circle cx="18" cy="20" r="1"/>
+          </svg>
+          <span id="cart-label">Warenkorb</span>
+          <span id="cart-count" class="grid min-w-5 place-items-center rounded-full bg-amber-500 px-1.5 py-0.5 text-xs text-stone-900" aria-live="polite">0</span>
+        </button>
+
+        <div class="flex rounded-full border border-stone-300 bg-white p-1 shadow-sm" aria-label="Language selection">
+          <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="de" aria-pressed="true">DE</button>
+          <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="en" aria-pressed="false">EN</button>
+        </div>
       </div>
     </nav>
   </header>
+
+  <div id="cart-drawer-container" class="pointer-events-none fixed inset-0 z-50" aria-hidden="true" inert>
+    <button id="cart-backdrop" type="button" class="absolute inset-0 bg-stone-950/60 opacity-0 transition-opacity duration-300" aria-label="Warenkorb schließen"></button>
+    <aside id="cart-drawer" class="absolute inset-y-0 right-0 flex w-full max-w-md translate-x-full flex-col bg-white shadow-2xl transition-transform duration-300" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+      <div class="flex items-center justify-between border-b border-stone-200 px-5 py-5 sm:px-6">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-red-600">Nostra Pizza</p>
+          <h2 id="cart-title" class="mt-1 text-2xl font-black">Dein Warenkorb</h2>
+        </div>
+        <button id="cart-close" type="button" class="grid size-10 place-items-center rounded-full bg-stone-100 text-2xl leading-none transition hover:bg-stone-200" aria-label="Warenkorb schließen">×</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-5 py-6 sm:px-6">
+        <p id="cart-empty" class="rounded-2xl bg-stone-100 px-5 py-8 text-center text-sm text-stone-600">Dein Warenkorb ist leer.</p>
+        <div id="cart-items" class="space-y-4"></div>
+      </div>
+
+      <div class="border-t border-stone-200 bg-stone-50 px-5 py-5 sm:px-6">
+        <div class="flex items-center justify-between">
+          <span id="cart-total-label" class="font-bold">Gesamt</span>
+          <span id="cart-total" class="text-xl font-black text-red-600">CHF 0.00</span>
+        </div>
+      </div>
+    </aside>
+  </div>
 
   <main>
     <section id="about" class="relative isolate scroll-mt-28 overflow-hidden bg-stone-900">
