@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nostra Pizza – frisch gebackene Pizza mit ausgewählten Zutaten.">
+  <base href="/">
+  <title>Nostra Pizza</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-stone-50 text-stone-900 antialiased">
+  <header class="sticky top-0 z-20 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
+      <a href="#" class="flex items-center gap-3" aria-label="Nostra Pizza home">
+        <span class="grid size-11 place-items-center rounded-full bg-red-700 text-xl text-white shadow-sm" aria-hidden="true">🍕</span>
+        <span class="text-xl font-black tracking-tight sm:text-2xl">Nostra Pizza</span>
+      </a>
+
+      <div class="flex rounded-full border border-stone-300 bg-white p-1 shadow-sm" aria-label="Language selection">
+        <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="de" aria-pressed="true">DE</button>
+        <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="en" aria-pressed="false">EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="relative isolate overflow-hidden bg-stone-950">
+      <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_rgba(220,38,38,0.3),_transparent_45%)]"></div>
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <span id="eyebrow" class="text-sm font-bold uppercase tracking-[0.25em] text-red-400">Frisch. Einfach. Italienisch.</span>
+        <h1 id="hero-title" class="mt-4 max-w-3xl text-4xl font-black tracking-tight text-white sm:text-6xl">Deine Lieblingspizza, frisch aus dem Ofen.</h1>
+        <p id="hero-description" class="mt-5 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">Handgemachte Pizza mit sorgfältig ausgewählten Zutaten und echtem italienischem Geschmack.</p>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8" aria-labelledby="menu-title">
+      <div class="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p id="menu-label" class="text-sm font-bold uppercase tracking-[0.2em] text-red-700">Unsere Auswahl</p>
+          <h2 id="menu-title" class="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Pizza-Menü</h2>
+        </div>
+        <p id="menu-note" class="max-w-md text-sm leading-6 text-stone-600">Alle Pizzen werden frisch zubereitet und haben einen Durchmesser von 32 cm.</p>
+      </div>
+
+      <div id="status" class="rounded-2xl border border-stone-200 bg-white p-8 text-center text-stone-600 shadow-sm" role="status" aria-live="polite">
+        Pizzen werden geladen...
+      </div>
+      <div id="pizza-list" class="hidden grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+  </main>
+
+  <footer class="border-t border-stone-200 bg-white">
+    <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-sm text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+      <p>© 2026 Nostra Pizza</p>
+      <p id="footer-text">Mit Liebe gebacken.</p>
+    </div>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
