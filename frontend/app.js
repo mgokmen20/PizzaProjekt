@@ -2,6 +2,9 @@ const apiUrl = 'http://localhost:5000/api/pizzas';
 
 const translations = {
   de: {
+    navMenu: 'Menü',
+    navAbout: 'Über uns',
+    navContact: 'Kontakt',
     eyebrow: 'Frisch. Einfach. Italienisch.',
     heroTitle: 'Deine Lieblingspizza, frisch aus dem Ofen.',
     heroDescription: 'Handgemachte Pizza mit sorgfältig ausgewählten Zutaten und echtem italienischem Geschmack.',
@@ -11,9 +14,16 @@ const translations = {
     loading: 'Pizzen werden geladen...',
     error: 'Das Menü konnte nicht geladen werden. Bitte versuche es später erneut.',
     addToCart: 'In den Warenkorb',
-    footer: 'Mit Liebe gebacken.',
+    footerTagline: 'Mit Liebe gebacken.',
+    hoursTitle: 'Öffnungszeiten',
+    hoursText: 'Montag–Sonntag\n11:30–22:00 Uhr',
+    locationTitle: 'Standort',
+    locationText: 'Bern, Schweiz',
   },
   en: {
+    navMenu: 'Menu',
+    navAbout: 'About',
+    navContact: 'Contact',
     eyebrow: 'Fresh. Simple. Italian.',
     heroTitle: 'Your favorite pizza, fresh from the oven.',
     heroDescription: 'Handmade pizza with carefully selected ingredients and authentic Italian flavor.',
@@ -23,7 +33,11 @@ const translations = {
     loading: 'Loading pizzas...',
     error: 'The menu could not be loaded. Please try again later.',
     addToCart: 'Add to Cart',
-    footer: 'Baked with love.',
+    footerTagline: 'Baked with love.',
+    hoursTitle: 'Opening hours',
+    hoursText: 'Monday–Sunday\n11:30–22:00',
+    locationTitle: 'Location',
+    locationText: 'Bern, Switzerland',
   },
 };
 
@@ -36,6 +50,9 @@ const englishDescriptions = {
 };
 
 const elements = {
+  navMenu: document.querySelector('#nav-menu'),
+  navAbout: document.querySelector('#nav-about'),
+  navContact: document.querySelector('#nav-contact'),
   eyebrow: document.querySelector('#eyebrow'),
   heroTitle: document.querySelector('#hero-title'),
   heroDescription: document.querySelector('#hero-description'),
@@ -44,7 +61,11 @@ const elements = {
   menuNote: document.querySelector('#menu-note'),
   pizzaList: document.querySelector('#pizza-list'),
   status: document.querySelector('#status'),
-  footerText: document.querySelector('#footer-text'),
+  footerTagline: document.querySelector('#footer-tagline'),
+  hoursTitle: document.querySelector('#hours-title'),
+  hoursText: document.querySelector('#hours-text'),
+  locationTitle: document.querySelector('#location-title'),
+  locationText: document.querySelector('#location-text'),
   languageButtons: document.querySelectorAll('.language-button'),
 };
 
@@ -56,18 +77,25 @@ function updateStaticContent() {
   const content = translations[currentLanguage];
 
   document.documentElement.lang = currentLanguage;
+  elements.navMenu.textContent = content.navMenu;
+  elements.navAbout.textContent = content.navAbout;
+  elements.navContact.textContent = content.navContact;
   elements.eyebrow.textContent = content.eyebrow;
   elements.heroTitle.textContent = content.heroTitle;
   elements.heroDescription.textContent = content.heroDescription;
   elements.menuLabel.textContent = content.menuLabel;
   elements.menuTitle.textContent = content.menuTitle;
   elements.menuNote.textContent = content.menuNote;
-  elements.footerText.textContent = content.footer;
+  elements.footerTagline.textContent = content.footerTagline;
+  elements.hoursTitle.textContent = content.hoursTitle;
+  elements.hoursText.textContent = content.hoursText;
+  elements.locationTitle.textContent = content.locationTitle;
+  elements.locationText.textContent = content.locationText;
 
   elements.languageButtons.forEach((button) => {
     const isActive = button.dataset.language === currentLanguage;
     button.setAttribute('aria-pressed', String(isActive));
-    button.classList.toggle('bg-stone-900', isActive);
+    button.classList.toggle('bg-red-600', isActive);
     button.classList.toggle('text-white', isActive);
     button.classList.toggle('text-stone-600', !isActive);
   });
@@ -110,7 +138,7 @@ function createPizzaCard(pizza) {
   actionRow.className = 'mt-6 flex items-center justify-between gap-4';
 
   const price = document.createElement('p');
-  price.className = 'text-xl font-black text-red-700';
+  price.className = 'text-xl font-black text-red-600';
   price.textContent = `CHF ${Number(pizza.price).toFixed(2)}`;
 
   const button = document.createElement('button');

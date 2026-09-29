@@ -1,22 +1,29 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Nostra Pizza – frisch gebackene Pizza mit ausgewählten Zutaten.">
   <base href="/">
   <title>Nostra Pizza</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M9 54 27 8c14 5 24 15 28 29L9 54Z' fill='%23f59e0b'/%3E%3Cpath d='M27 8c14 5 24 15 28 29' fill='none' stroke='%23dc2626' stroke-width='8' stroke-linecap='round'/%3E%3Ccircle cx='30' cy='27' r='5' fill='%23dc2626'/%3E%3Ccircle cx='22' cy='40' r='5' fill='%23dc2626'/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-stone-50 text-stone-900 antialiased">
   <header class="sticky top-0 z-20 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur">
-    <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
+    <nav class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
       <a href="#" class="flex items-center gap-3" aria-label="Nostra Pizza home">
-        <span class="grid size-11 place-items-center rounded-full bg-red-700 text-xl text-white shadow-sm" aria-hidden="true">🍕</span>
+        <span class="grid size-11 place-items-center rounded-full bg-red-600 text-xl text-white shadow-sm ring-2 ring-amber-500" aria-hidden="true">🍕</span>
         <span class="text-xl font-black tracking-tight sm:text-2xl">Nostra Pizza</span>
       </a>
 
-      <div class="flex rounded-full border border-stone-300 bg-white p-1 shadow-sm" aria-label="Language selection">
+      <div class="order-3 flex w-full items-center justify-center gap-6 border-t border-stone-200 pt-3 text-sm font-bold sm:order-2 sm:w-auto sm:border-0 sm:pt-0">
+        <a id="nav-menu" href="#menu" class="transition hover:text-red-600">Menü</a>
+        <a id="nav-about" href="#about" class="transition hover:text-red-600">Über uns</a>
+        <a id="nav-contact" href="#contact" class="transition hover:text-red-600">Kontakt</a>
+      </div>
+
+      <div class="order-2 flex rounded-full border border-stone-300 bg-white p-1 shadow-sm sm:order-3" aria-label="Language selection">
         <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="de" aria-pressed="true">DE</button>
         <button type="button" class="language-button rounded-full px-3 py-1.5 text-sm font-bold transition" data-language="en" aria-pressed="false">EN</button>
       </div>
@@ -24,19 +31,19 @@
   </header>
 
   <main>
-    <section class="relative isolate overflow-hidden bg-stone-950">
-      <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_rgba(220,38,38,0.3),_transparent_45%)]"></div>
+    <section id="about" class="relative isolate scroll-mt-28 overflow-hidden bg-stone-900">
+      <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_rgba(220,38,38,0.35),_transparent_45%)]"></div>
       <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-        <span id="eyebrow" class="text-sm font-bold uppercase tracking-[0.25em] text-red-400">Frisch. Einfach. Italienisch.</span>
+        <span id="eyebrow" class="text-sm font-bold uppercase tracking-[0.25em] text-amber-500">Frisch. Einfach. Italienisch.</span>
         <h1 id="hero-title" class="mt-4 max-w-3xl text-4xl font-black tracking-tight text-white sm:text-6xl">Deine Lieblingspizza, frisch aus dem Ofen.</h1>
         <p id="hero-description" class="mt-5 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">Handgemachte Pizza mit sorgfältig ausgewählten Zutaten und echtem italienischem Geschmack.</p>
       </div>
     </section>
 
-    <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8" aria-labelledby="menu-title">
+    <section id="menu" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-14 sm:px-6 sm:py-20 lg:px-8" aria-labelledby="menu-title">
       <div class="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p id="menu-label" class="text-sm font-bold uppercase tracking-[0.2em] text-red-700">Unsere Auswahl</p>
+          <p id="menu-label" class="text-sm font-bold uppercase tracking-[0.2em] text-red-600">Unsere Auswahl</p>
           <h2 id="menu-title" class="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Pizza-Menü</h2>
         </div>
         <p id="menu-note" class="max-w-md text-sm leading-6 text-stone-600">Alle Pizzen werden frisch zubereitet und haben einen Durchmesser von 32 cm.</p>
@@ -49,10 +56,24 @@
     </section>
   </main>
 
-  <footer class="border-t border-stone-200 bg-white">
-    <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-sm text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-      <p>© 2026 Nostra Pizza</p>
-      <p id="footer-text">Mit Liebe gebacken.</p>
+  <footer id="contact" class="scroll-mt-28 bg-stone-900 text-stone-300">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-3 sm:px-6 lg:px-8">
+      <div>
+        <p class="text-xl font-black text-white">Nostra Pizza</p>
+        <p id="footer-tagline" class="mt-3 max-w-xs text-sm leading-6 text-stone-400">Mit Liebe gebacken.</p>
+      </div>
+      <div>
+        <h2 id="hours-title" class="font-bold text-amber-500">Öffnungszeiten</h2>
+        <p id="hours-text" class="mt-3 whitespace-pre-line text-sm leading-6">Montag–Sonntag
+11:30–22:00 Uhr</p>
+      </div>
+      <div>
+        <h2 id="location-title" class="font-bold text-amber-500">Standort</h2>
+        <p id="location-text" class="mt-3 text-sm leading-6">Bern, Schweiz</p>
+      </div>
+    </div>
+    <div class="border-t border-stone-800">
+      <p class="mx-auto max-w-7xl px-4 py-5 text-xs text-stone-500 sm:px-6 lg:px-8">© 2026 Nostra Pizza</p>
     </div>
   </footer>
 
