@@ -1,4 +1,5 @@
 const apiUrl = 'http://localhost:5000/api/pizzas';
+const orderApiUrl = 'http://localhost:5000/api/orders';
 
 const translations = {
   de: {
@@ -13,6 +14,14 @@ const translations = {
     decreaseQuantity: 'Menge verringern',
     increaseQuantity: 'Menge erhöhen',
     remove: 'Entfernen',
+    customerName: 'Kundenname',
+    customerNamePlaceholder: 'Vor- und Nachname',
+    deliveryAddress: 'Lieferadresse',
+    deliveryAddressPlaceholder: 'Straße, Hausnummer, PLZ und Ort',
+    orderNow: 'Jetzt bestellen',
+    placingOrder: 'Bestellung wird gesendet...',
+    orderSuccess: 'Bestellung #{id} wurde erfolgreich aufgegeben.',
+    orderError: 'Die Bestellung konnte nicht gesendet werden. Bitte versuche es erneut.',
     eyebrow: 'Frisch. Einfach. Italienisch.',
     heroTitle: 'Deine Lieblingspizza, frisch aus dem Ofen.',
     heroDescription: 'Handgemachte Pizza mit sorgfältig ausgewählten Zutaten und echtem italienischem Geschmack.',
@@ -40,6 +49,14 @@ const translations = {
     decreaseQuantity: 'Decrease quantity',
     increaseQuantity: 'Increase quantity',
     remove: 'Remove',
+    customerName: 'Customer Name',
+    customerNamePlaceholder: 'First and last name',
+    deliveryAddress: 'Delivery Address',
+    deliveryAddressPlaceholder: 'Street, number, postal code, and city',
+    orderNow: 'Order Now',
+    placingOrder: 'Placing order...',
+    orderSuccess: 'Order #{id} was placed successfully.',
+    orderError: 'The order could not be placed. Please try again.',
     eyebrow: 'Fresh. Simple. Italian.',
     heroTitle: 'Your favorite pizza, fresh from the oven.',
     heroDescription: 'Handmade pizza with carefully selected ingredients and authentic Italian flavor.',
@@ -81,6 +98,14 @@ const elements = {
   cartItems: document.querySelector('#cart-items'),
   cartTotalLabel: document.querySelector('#cart-total-label'),
   cartTotal: document.querySelector('#cart-total'),
+  checkoutForm: document.querySelector('#checkout-form'),
+  customerNameLabel: document.querySelector('#customer-name-label'),
+  customerName: document.querySelector('#customer-name'),
+  deliveryAddressLabel: document.querySelector('#delivery-address-label'),
+  deliveryAddress: document.querySelector('#delivery-address'),
+  checkoutError: document.querySelector('#checkout-error'),
+  orderButton: document.querySelector('#order-button'),
+  notification: document.querySelector('#notification'),
   eyebrow: document.querySelector('#eyebrow'),
   heroTitle: document.querySelector('#hero-title'),
   heroDescription: document.querySelector('#hero-description'),
@@ -101,7 +126,9 @@ let currentLanguage = 'de';
 let pizzas = [];
 let cart = [];
 let hasLoadingError = false;
+let isSubmittingOrder = false;
 let lastFocusedElement = null;
+let notificationTimer = null;
 
 function updateStaticContent() {
   const content = translations[currentLanguage];
@@ -117,6 +144,15 @@ function updateStaticContent() {
   elements.cartButton.setAttribute('aria-label', `${content.cartLabel}: ${getCartItemCount()}`);
   elements.cartClose.setAttribute('aria-label', content.closeCart);
   elements.cartBackdrop.setAttribute('aria-label', content.closeCart);
+  elements.customerNameLabel.textContent = content.customerName;
+  elements.customerName.placeholder = content.customerNamePlaceholder;
+  elements.deliveryAddressLabel.textContent = content.deliveryAddress;
+  elements.deliveryAddress.placeholder = content.deliveryAddressPlaceholder;
+  elements.orderButton.textContent = isSubmittingOrder ? content.placingOrder : content.orderNow;
+
+  if (!elements.checkoutError.classList.contains('hidden')) {
+    elements.checkoutError.textContent = content.orderError;
+  }
   elements.eyebrow.textContent = content.eyebrow;
   elements.heroTitle.textContent = content.heroTitle;
   elements.heroDescription.textContent = content.heroDescription;
@@ -264,6 +300,90 @@ function renderCart() {
   elements.cartItems.replaceChildren(...cart.map(createCartItem));
   elements.cartEmpty.classList.toggle('hidden', cart.length > 0);
   elements.cartTotal.textContent = formatPrice(total);
+  elements.orderButton.disabled = cart.length === 0 || isSubmittingOrder;
+  elements.orderButton.textContent = isSubmittingOrder
+    ? translations[currentLanguage].placingOrder
+    : translations[currentLanguage].orderNow;
+}
+
+function showNotification(message, type) {
+  window.clearTimeout(notificationTimer);
+  elements.notification.textContent = message;
+  elements.notification.classList.toggle('bg-green-600', type === 'success');
+  elements.notification.classList.toggle('bg-red-600', type === 'error');
+  elements.notification.classList.remove('translate-y-4', 'opacity-0');
+  elements.notification.classList.add('translate-y-0', 'opacity-100');
+
+  notificationTimer = window.setTimeout(() => {
+    elements.notification.classList.add('translate-y-4', 'opacity-0');
+    elements.notification.classList.remove('translate-y-0', 'opacity-100');
+  }, 4000);
+}
+
+async function submitOrder(event) {
+  event.preventDefault();
+
+  if (cart.length === 0 || isSubmittingOrder) {
+    return;
+  }
+
+  const customerName = elements.customerName.value.trim();
+  const deliveryAddress = elements.deliveryAddress.value.trim();
+
+  if (!customerName || !deliveryAddress) {
+    elements.checkoutForm.reportValidity();
+    return;
+  }
+
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const orderItems = cart.map((item) => ({
+    id: item.id,
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+  }));
+
+  isSubmittingOrder = true;
+  elements.checkoutError.classList.add('hidden');
+  renderCart();
+
+  try {
+    const response = await fetch(orderApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customer_name: customerName,
+        delivery_address: deliveryAddress,
+        items: orderItems,
+        total_price: Number(totalPrice.toFixed(2)),
+      }),
+    });
+
+    if (response.status !== 201) {
+      throw new Error(`Order API returned status ${response.status}.`);
+    }
+
+    const createdOrder = await response.json();
+    const successMessage = translations[currentLanguage].orderSuccess.replace('{id}', createdOrder.id);
+
+    cart = [];
+    elements.checkoutForm.reset();
+    renderCart();
+    closeCart();
+    showNotification(successMessage, 'success');
+  } catch (error) {
+    const errorMessage = translations[currentLanguage].orderError;
+
+    elements.checkoutError.textContent = errorMessage;
+    elements.checkoutError.classList.remove('hidden');
+    showNotification(errorMessage, 'error');
+    console.error('Failed to place order:', error);
+  } finally {
+    isSubmittingOrder = false;
+    renderCart();
+  }
 }
 
 function openCart() {
@@ -388,6 +508,13 @@ elements.languageButtons.forEach((button) => {
 elements.cartButton.addEventListener('click', openCart);
 elements.cartClose.addEventListener('click', closeCart);
 elements.cartBackdrop.addEventListener('click', closeCart);
+elements.checkoutForm.addEventListener('submit', submitOrder);
+
+[elements.customerName, elements.deliveryAddress].forEach((input) => {
+  input.addEventListener('input', () => {
+    elements.checkoutError.classList.add('hidden');
+  });
+});
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && elements.cartButton.getAttribute('aria-expanded') === 'true') {

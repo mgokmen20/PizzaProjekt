@@ -12,3 +12,12 @@ INSERT INTO pizzas (name, description, price, image_url) VALUES
     ('Pizza Prosciutto e Funghi', 'Tomatensauce, Mozzarella, Schinken, Champignons und Oregano.', 19.00, '/images/pizza-prosciutto-e-funghi.jpg'),
     ('Pizza Vegetariana', 'Tomatensauce, Mozzarella, Peperoni, Champignons, Zucchini und Oliven.', 20.00, '/images/pizza-vegetariana.jpg'),
     ('Pizza Quattro Formaggi', 'Tomatensauce, Mozzarella, Gorgonzola, Parmesan und Emmentaler.', 21.00, '/images/pizza-quattro-formaggi.jpg');
+
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    delivery_address TEXT NOT NULL,
+    items JSONB NOT NULL,
+    total_price NUMERIC(6, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

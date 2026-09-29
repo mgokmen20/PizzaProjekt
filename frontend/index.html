@@ -63,9 +63,24 @@
           <span id="cart-total-label" class="font-bold">Gesamt</span>
           <span id="cart-total" class="text-xl font-black text-red-600">CHF 0.00</span>
         </div>
+
+        <form id="checkout-form" class="mt-5 space-y-4">
+          <div>
+            <label id="customer-name-label" for="customer-name" class="mb-1.5 block text-sm font-bold">Kundenname</label>
+            <input id="customer-name" name="customer_name" type="text" required autocomplete="name" placeholder="Vor- und Nachname" class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-red-600/20">
+          </div>
+          <div>
+            <label id="delivery-address-label" for="delivery-address" class="mb-1.5 block text-sm font-bold">Lieferadresse</label>
+            <textarea id="delivery-address" name="delivery_address" required autocomplete="street-address" rows="2" placeholder="Straße, Hausnummer, PLZ und Ort" class="w-full resize-none rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-stone-400 focus:border-red-600 focus:ring-2 focus:ring-red-600/20"></textarea>
+          </div>
+          <p id="checkout-error" class="hidden rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700" role="alert"></p>
+          <button id="order-button" type="submit" disabled class="w-full rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500">Jetzt bestellen</button>
+        </form>
       </div>
     </aside>
   </div>
+
+  <div id="notification" class="pointer-events-none fixed bottom-5 left-1/2 z-[60] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 translate-y-4 rounded-2xl px-5 py-4 text-center text-sm font-bold text-white opacity-0 shadow-xl transition duration-300" role="status" aria-live="assertive"></div>
 
   <main>
     <section id="about" class="relative isolate scroll-mt-28 overflow-hidden bg-stone-900">

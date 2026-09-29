@@ -18,6 +18,7 @@ pool.on('error', (error) => {
 });
 
 app.use(cors());
+app.use(express.json());
 
 app.get('/api/pizzas', async (request, response) => {
   try {
@@ -26,6 +27,42 @@ app.get('/api/pizzas', async (request, response) => {
   } catch (error) {
     console.error('Failed to fetch pizzas:', error);
     response.status(500).json({ error: 'Failed to fetch pizzas.' });
+  }
+});
+
+app.post('/api/orders', async (request, response) => {
+  const {
+    customer_name: customerName,
+    delivery_address: deliveryAddress,
+    items,
+    total_price: totalPrice,
+  } = request.body;
+
+  if (!customerName || !deliveryAddress || !items || totalPrice === undefined || totalPrice === null) {
+    return response.status(400).json({ error: 'Missing required fields' });
+  }
+
+  let parsedItems = items;
+
+  if (typeof items === 'string') {
+    try {
+      parsedItems = JSON.parse(items);
+    } catch (error) {
+      return response.status(400).json({ error: 'Invalid items JSON' });
+    }
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO orders (customer_name, delivery_address, items, total_price)
+       VALUES ($1, $2, $3, $4) RETURNING *;`,
+      [customerName, deliveryAddress, JSON.stringify(parsedItems), totalPrice],
+    );
+
+    return response.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Failed to create order:', error);
+    return response.status(500).json({ error: 'Failed to create order.' });
   }
 });
 
