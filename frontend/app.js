@@ -1,5 +1,5 @@
-const apiUrl = 'http://localhost:5000/api/pizzas';
-const orderApiUrl = 'http://localhost:5000/api/orders';
+const apiUrl = '/api/pizzas';
+const orderApiUrl = '/api/orders';
 
 const translations = {
   de: {
