@@ -522,6 +522,8 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-updateStaticContent();
-renderCart();
-loadPizzas();
+window.addEventListener('DOMContentLoaded', () => {
+  updateStaticContent();
+  renderCart();
+  loadPizzas();
+});
