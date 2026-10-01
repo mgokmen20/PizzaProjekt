@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Dashboard | Nostra Pizza</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-stone-100 text-stone-900 antialiased">
+  <main>
+    <section id="login-view" class="grid min-h-screen place-items-center px-4">
+      <div class="w-full max-w-md rounded-3xl border border-stone-200 bg-white p-8 shadow-xl">
+        <div class="mb-8">
+          <span class="grid size-12 place-items-center rounded-2xl bg-red-600 text-2xl text-white">🍕</span>
+          <p class="mt-6 text-sm font-bold uppercase tracking-[0.2em] text-red-600">Nostra Pizza</p>
+          <h1 class="mt-2 text-3xl font-black tracking-tight">Admin Dashboard</h1>
+          <p class="mt-3 text-sm leading-6 text-stone-500">Enter the admin key to securely view and manage orders.</p>
+        </div>
+
+        <form id="login-form" class="space-y-4">
+          <div>
+            <label for="admin-key" class="mb-2 block text-sm font-bold">Admin key</label>
+            <input id="admin-key" name="admin_key" type="password" required autocomplete="current-password" placeholder="Enter your secret key" class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-red-600 focus:ring-2 focus:ring-red-600/20">
+          </div>
+          <p id="login-error" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert"></p>
+          <button id="login-button" type="submit" class="w-full rounded-xl bg-stone-900 px-5 py-3 font-bold text-white transition hover:bg-red-600 disabled:cursor-wait disabled:opacity-60">Open dashboard</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="dashboard-view" class="hidden min-h-screen">
+      <header class="border-b border-stone-200 bg-white">
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-8">
+          <div class="flex items-center gap-3">
+            <span class="grid size-10 place-items-center rounded-xl bg-red-600 text-xl text-white">🍕</span>
+            <div>
+              <p class="text-lg font-black">Nostra Pizza</p>
+              <p class="text-xs text-stone-500">Store management</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="refresh-button" type="button" class="rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-bold transition hover:border-stone-900">Refresh</button>
+            <button id="logout-button" type="button" class="rounded-xl bg-stone-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-600">Lock dashboard</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="text-sm font-bold uppercase tracking-[0.2em] text-red-600">Store management</p>
+            <h1 class="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Admin Dashboard</h1>
+          </div>
+          <div class="flex gap-3">
+            <div class="rounded-2xl bg-white px-5 py-3 shadow-sm ring-1 ring-stone-200">
+              <p class="text-xs font-bold uppercase tracking-wider text-stone-500">Orders</p>
+              <p id="order-count" class="mt-1 text-2xl font-black">0</p>
+            </div>
+            <div class="rounded-2xl bg-white px-5 py-3 shadow-sm ring-1 ring-stone-200">
+              <p class="text-xs font-bold uppercase tracking-wider text-stone-500">Pizzas</p>
+              <p id="pizza-count" class="mt-1 text-2xl font-black">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6 flex gap-2 rounded-2xl bg-white p-2 shadow-sm ring-1 ring-stone-200">
+          <button type="button" class="dashboard-tab flex-1 rounded-xl px-4 py-3 text-sm font-bold transition" data-panel="orders">Orders</button>
+          <button type="button" class="dashboard-tab flex-1 rounded-xl px-4 py-3 text-sm font-bold transition" data-panel="pizzas">Pizza Menu</button>
+        </div>
+
+        <section id="orders-panel">
+          <div class="mb-4 flex justify-end">
+            <button id="delete-all-orders-button" type="button" class="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50">Delete all orders</button>
+          </div>
+
+          <div id="dashboard-message" class="rounded-2xl border border-stone-200 bg-white p-8 text-center text-stone-500 shadow-sm" role="status">Loading orders...</div>
+
+          <div id="orders-table-container" class="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-stone-200 text-left text-sm">
+                <thead class="bg-stone-50 text-xs uppercase tracking-wider text-stone-500">
+                  <tr>
+                    <th class="px-5 py-4 font-bold">Order ID</th>
+                    <th class="px-5 py-4 font-bold">Customer</th>
+                    <th class="px-5 py-4 font-bold">Address</th>
+                    <th class="px-5 py-4 font-bold">Items</th>
+                    <th class="px-5 py-4 font-bold">Total</th>
+                    <th class="px-5 py-4 font-bold">Status</th>
+                    <th class="px-5 py-4 font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-body" class="divide-y divide-stone-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="pizzas-panel" class="hidden">
+          <div class="mb-4 flex justify-end">
+            <button id="add-pizza-button" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700">Add pizza</button>
+          </div>
+
+          <div id="pizzas-message" class="rounded-2xl border border-stone-200 bg-white p-8 text-center text-stone-500 shadow-sm" role="status">Loading pizzas...</div>
+
+          <div id="pizzas-table-container" class="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-stone-200 text-left text-sm">
+                <thead class="bg-stone-50 text-xs uppercase tracking-wider text-stone-500">
+                  <tr>
+                    <th class="px-5 py-4 font-bold">Pizza</th>
+                    <th class="px-5 py-4 font-bold">Description</th>
+                    <th class="px-5 py-4 font-bold">Price</th>
+                    <th class="px-5 py-4 font-bold">Image path</th>
+                    <th class="px-5 py-4 font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="pizzas-table-body" class="divide-y divide-stone-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div id="pizza-modal" class="hidden fixed inset-0 z-40 grid place-items-center overflow-y-auto bg-stone-950/60 px-4 py-8">
+    <div class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8" role="dialog" aria-modal="true" aria-labelledby="pizza-modal-title">
+      <div class="flex items-center justify-between">
+        <h2 id="pizza-modal-title" class="text-2xl font-black">Add pizza</h2>
+        <button id="close-pizza-modal-button" type="button" class="grid size-10 place-items-center rounded-full bg-stone-100 text-2xl transition hover:bg-stone-200" aria-label="Close">×</button>
+      </div>
+
+      <form id="pizza-form" class="mt-6 space-y-4">
+        <input id="pizza-id" type="hidden">
+        <div>
+          <label for="pizza-name" class="mb-1.5 block text-sm font-bold">Name</label>
+          <input id="pizza-name" type="text" required maxlength="100" class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20">
+        </div>
+        <div>
+          <label for="pizza-description" class="mb-1.5 block text-sm font-bold">Description</label>
+          <textarea id="pizza-description" required rows="3" class="w-full resize-none rounded-xl border border-stone-300 px-4 py-3 outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20"></textarea>
+        </div>
+        <div>
+          <label for="pizza-price" class="mb-1.5 block text-sm font-bold">Price (CHF)</label>
+          <input id="pizza-price" type="number" required min="0" step="0.01" class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20">
+        </div>
+        <div>
+          <label for="pizza-image-url" class="mb-1.5 block text-sm font-bold">Image path</label>
+          <input id="pizza-image-url" type="text" required placeholder="/images/pizza-name.jpg" class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20">
+        </div>
+        <p id="pizza-form-error" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert"></p>
+        <button id="save-pizza-button" type="submit" class="w-full rounded-xl bg-red-600 px-5 py-3 font-bold text-white transition hover:bg-red-700 disabled:cursor-wait disabled:opacity-60">Save pizza</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="notification" class="pointer-events-none fixed bottom-5 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 translate-y-4 rounded-2xl px-5 py-4 text-center text-sm font-bold text-white opacity-0 shadow-xl transition duration-300" role="status" aria-live="polite"></div>
+
+  <script>
+    const ordersApiUrl = '/api/admin/orders';
+    const pizzasApiUrl = '/api/admin/pizzas';
+    const sessionKeyName = 'nostraPizzaAdminKey';
+    const orderStatuses = ['Received', 'Preparing', 'Delivered', 'Cancelled'];
+
+    const elements = {
+      loginView: document.querySelector('#login-view'),
+      dashboardView: document.querySelector('#dashboard-view'),
+      loginForm: document.querySelector('#login-form'),
+      adminKey: document.querySelector('#admin-key'),
+      loginButton: document.querySelector('#login-button'),
+      loginError: document.querySelector('#login-error'),
+      refreshButton: document.querySelector('#refresh-button'),
+      logoutButton: document.querySelector('#logout-button'),
+      orderCount: document.querySelector('#order-count'),
+      pizzaCount: document.querySelector('#pizza-count'),
+      dashboardTabs: document.querySelectorAll('.dashboard-tab'),
+      ordersPanel: document.querySelector('#orders-panel'),
+      pizzasPanel: document.querySelector('#pizzas-panel'),
+      deleteAllOrdersButton: document.querySelector('#delete-all-orders-button'),
+      dashboardMessage: document.querySelector('#dashboard-message'),
+      tableContainer: document.querySelector('#orders-table-container'),
+      tableBody: document.querySelector('#orders-table-body'),
+      pizzasMessage: document.querySelector('#pizzas-message'),
+      pizzasTableContainer: document.querySelector('#pizzas-table-container'),
+      pizzasTableBody: document.querySelector('#pizzas-table-body'),
+      addPizzaButton: document.querySelector('#add-pizza-button'),
+      pizzaModal: document.querySelector('#pizza-modal'),
+      pizzaModalTitle: document.querySelector('#pizza-modal-title'),
+      closePizzaModalButton: document.querySelector('#close-pizza-modal-button'),
+      pizzaForm: document.querySelector('#pizza-form'),
+      pizzaId: document.querySelector('#pizza-id'),
+      pizzaName: document.querySelector('#pizza-name'),
+      pizzaDescription: document.querySelector('#pizza-description'),
+      pizzaPrice: document.querySelector('#pizza-price'),
+      pizzaImageUrl: document.querySelector('#pizza-image-url'),
+      pizzaFormError: document.querySelector('#pizza-form-error'),
+      savePizzaButton: document.querySelector('#save-pizza-button'),
+      notification: document.querySelector('#notification'),
+    };
+
+    let orders = [];
+    let pizzas = [];
+    let notificationTimer = null;
+
+    function getAdminKey() {
+      return sessionStorage.getItem(sessionKeyName) || '';
+    }
+
+    function showLogin(message = '') {
+      elements.dashboardView.classList.add('hidden');
+      elements.loginView.classList.remove('hidden');
+      elements.loginError.textContent = message;
+      elements.loginError.classList.toggle('hidden', !message);
+      elements.adminKey.value = '';
+      elements.adminKey.focus();
+    }
+
+    function showDashboard() {
+      elements.loginView.classList.add('hidden');
+      elements.dashboardView.classList.remove('hidden');
+    }
+
+    function switchPanel(panelName) {
+      const showOrders = panelName === 'orders';
+      elements.ordersPanel.classList.toggle('hidden', !showOrders);
+      elements.pizzasPanel.classList.toggle('hidden', showOrders);
+
+      elements.dashboardTabs.forEach((tab) => {
+        const isActive = tab.dataset.panel === panelName;
+        tab.classList.toggle('bg-stone-900', isActive);
+        tab.classList.toggle('text-white', isActive);
+        tab.classList.toggle('text-stone-600', !isActive);
+      });
+    }
+
+    function openPizzaModal(pizza = null) {
+      elements.pizzaForm.reset();
+      elements.pizzaFormError.classList.add('hidden');
+      elements.pizzaId.value = pizza?.id || '';
+      elements.pizzaName.value = pizza?.name || '';
+      elements.pizzaDescription.value = pizza?.description || '';
+      elements.pizzaPrice.value = pizza?.price || '';
+      elements.pizzaImageUrl.value = pizza?.image_url || '';
+      elements.pizzaModalTitle.textContent = pizza ? 'Edit pizza' : 'Add pizza';
+      elements.savePizzaButton.textContent = pizza ? 'Update pizza' : 'Create pizza';
+      elements.pizzaModal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+      elements.pizzaName.focus();
+    }
+
+    function closePizzaModal() {
+      elements.pizzaModal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    function showNotification(message, type = 'success') {
+      window.clearTimeout(notificationTimer);
+      elements.notification.textContent = message;
+      elements.notification.classList.toggle('bg-green-600', type === 'success');
+      elements.notification.classList.toggle('bg-red-600', type === 'error');
+      elements.notification.classList.remove('translate-y-4', 'opacity-0');
+      elements.notification.classList.add('translate-y-0', 'opacity-100');
+
+      notificationTimer = window.setTimeout(() => {
+        elements.notification.classList.add('translate-y-4', 'opacity-0');
+        elements.notification.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+
+    function formatPrice(value) {
+      return `CHF ${Number(value).toFixed(2)}`;
+    }
+
+    function formatItems(items) {
+      let parsedItems = items;
+
+      if (typeof parsedItems === 'string') {
+        try {
+          parsedItems = JSON.parse(parsedItems);
+        } catch (error) {
+          return 'Invalid item data';
+        }
+      }
+
+      if (!Array.isArray(parsedItems)) {
+        return 'No item details';
+      }
+
+      return parsedItems
+        .map((item) => `${item.quantity || 1}× ${item.name || 'Pizza'}`)
+        .join(', ');
+    }
+
+    function getStatusClasses(status) {
+      const classes = {
+        Received: 'bg-blue-100 text-blue-700',
+        Preparing: 'bg-amber-100 text-amber-700',
+        Delivered: 'bg-green-100 text-green-700',
+        Cancelled: 'bg-red-100 text-red-700',
+      };
+
+      return classes[status] || 'bg-stone-100 text-stone-700';
+    }
+
+    function createCell(content, className = '') {
+      const cell = document.createElement('td');
+      cell.className = `px-5 py-5 align-top ${className}`;
+      cell.textContent = content;
+      return cell;
+    }
+
+    function createOrderRow(order) {
+      const row = document.createElement('tr');
+      row.className = 'transition hover:bg-stone-50';
+
+      const idCell = createCell(`#${order.id}`, 'font-black');
+      const customerCell = createCell(order.customer_name, 'min-w-40 font-bold');
+      const addressCell = createCell(order.delivery_address, 'min-w-56 max-w-xs text-stone-600');
+      const itemsCell = createCell(formatItems(order.items), 'min-w-64 max-w-sm text-stone-600');
+      const totalCell = createCell(formatPrice(order.total_price), 'whitespace-nowrap font-black');
+
+      const statusCell = document.createElement('td');
+      statusCell.className = 'px-5 py-5 align-top';
+      const statusBadge = document.createElement('span');
+      statusBadge.className = `inline-flex rounded-full px-3 py-1 text-xs font-bold ${getStatusClasses(order.status)}`;
+      statusBadge.textContent = order.status;
+      statusCell.append(statusBadge);
+
+      const actionsCell = document.createElement('td');
+      actionsCell.className = 'min-w-72 px-5 py-5 align-top';
+      const actions = document.createElement('div');
+      actions.className = 'flex flex-wrap gap-2';
+
+      orderStatuses.forEach((status) => {
+        const button = document.createElement('button');
+        const isCurrentStatus = status === order.status;
+        button.type = 'button';
+        button.disabled = isCurrentStatus;
+        button.className = isCurrentStatus
+          ? 'cursor-default rounded-lg bg-stone-200 px-3 py-1.5 text-xs font-bold text-stone-500'
+          : 'rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-bold transition hover:border-red-600 hover:text-red-600';
+        button.textContent = status;
+        button.addEventListener('click', () => updateOrderStatus(order.id, status, button));
+        actions.append(button);
+      });
+
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700';
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => deleteOrder(order.id));
+      actions.append(deleteButton);
+
+      actionsCell.append(actions);
+      row.append(idCell, customerCell, addressCell, itemsCell, totalCell, statusCell, actionsCell);
+      return row;
+    }
+
+    function renderOrders() {
+      elements.orderCount.textContent = orders.length;
+      elements.tableBody.replaceChildren(...orders.map(createOrderRow));
+      elements.dashboardMessage.classList.toggle('hidden', orders.length > 0);
+      elements.tableContainer.classList.toggle('hidden', orders.length === 0);
+      elements.deleteAllOrdersButton.disabled = orders.length === 0;
+
+      if (orders.length === 0) {
+        elements.dashboardMessage.textContent = 'No orders have been placed yet.';
+      }
+    }
+
+    function createPizzaRow(pizza) {
+      const row = document.createElement('tr');
+      row.className = 'transition hover:bg-stone-50';
+
+      const pizzaCell = document.createElement('td');
+      pizzaCell.className = 'min-w-52 px-5 py-5 align-top';
+      const pizzaDetails = document.createElement('div');
+      pizzaDetails.className = 'flex items-center gap-3';
+      const image = document.createElement('img');
+      image.src = pizza.image_url;
+      image.alt = pizza.name;
+      image.className = 'size-14 rounded-xl bg-stone-100 object-cover';
+      image.onerror = () => {
+        image.classList.add('invisible');
+        image.onerror = null;
+      };
+      const name = document.createElement('span');
+      name.className = 'font-bold';
+      name.textContent = pizza.name;
+      pizzaDetails.append(image, name);
+      pizzaCell.append(pizzaDetails);
+
+      const descriptionCell = createCell(pizza.description, 'min-w-72 max-w-md text-stone-600');
+      const priceCell = createCell(formatPrice(pizza.price), 'whitespace-nowrap font-black');
+      const imageCell = createCell(pizza.image_url, 'min-w-52 text-stone-500');
+
+      const actionsCell = document.createElement('td');
+      actionsCell.className = 'px-5 py-5 align-top';
+      const actions = document.createElement('div');
+      actions.className = 'flex gap-2';
+
+      const editButton = document.createElement('button');
+      editButton.type = 'button';
+      editButton.className = 'rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-bold transition hover:border-stone-900';
+      editButton.textContent = 'Edit';
+      editButton.addEventListener('click', () => openPizzaModal(pizza));
+
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700';
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => deletePizza(pizza.id));
+
+      actions.append(editButton, deleteButton);
+      actionsCell.append(actions);
+      row.append(pizzaCell, descriptionCell, priceCell, imageCell, actionsCell);
+      return row;
+    }
+
+    function renderPizzas() {
+      elements.pizzaCount.textContent = pizzas.length;
+      elements.pizzasTableBody.replaceChildren(...pizzas.map(createPizzaRow));
+      elements.pizzasMessage.classList.toggle('hidden', pizzas.length > 0);
+      elements.pizzasTableContainer.classList.toggle('hidden', pizzas.length === 0);
+
+      if (pizzas.length === 0) {
+        elements.pizzasMessage.textContent = 'No pizzas are available.';
+      }
+    }
+
+    async function loadOrders() {
+      const adminKey = getAdminKey();
+
+      if (!adminKey) {
+        showLogin();
+        return;
+      }
+
+      showDashboard();
+      elements.dashboardMessage.textContent = 'Loading orders...';
+      elements.dashboardMessage.classList.remove('hidden');
+      elements.tableContainer.classList.add('hidden');
+      elements.refreshButton.disabled = true;
+
+      try {
+        const response = await fetch(ordersApiUrl, {
+          headers: {
+            'x-admin-key': adminKey,
+          },
+        });
+
+        if (response.status === 401) {
+          sessionStorage.removeItem(sessionKeyName);
+          showLogin('The admin key is invalid.');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Orders API returned status ${response.status}.`);
+        }
+
+        orders = await response.json();
+        renderOrders();
+      } catch (error) {
+        elements.dashboardMessage.textContent = 'Orders could not be loaded. Please try again.';
+        showNotification('Orders could not be loaded.', 'error');
+        console.error('Failed to load orders:', error);
+      } finally {
+        elements.refreshButton.disabled = false;
+        elements.loginButton.disabled = false;
+        elements.loginButton.textContent = 'Open dashboard';
+      }
+    }
+
+    async function loadPizzas() {
+      const adminKey = getAdminKey();
+
+      if (!adminKey) {
+        return;
+      }
+
+      elements.pizzasMessage.textContent = 'Loading pizzas...';
+      elements.pizzasMessage.classList.remove('hidden');
+      elements.pizzasTableContainer.classList.add('hidden');
+
+      try {
+        const response = await fetch(pizzasApiUrl, {
+          headers: {
+            'x-admin-key': adminKey,
+          },
+        });
+
+        if (response.status === 401) {
+          sessionStorage.removeItem(sessionKeyName);
+          showLogin('The admin key is invalid.');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Pizzas API returned status ${response.status}.`);
+        }
+
+        pizzas = await response.json();
+        renderPizzas();
+      } catch (error) {
+        elements.pizzasMessage.textContent = 'Pizzas could not be loaded. Please try again.';
+        showNotification('Pizzas could not be loaded.', 'error');
+        console.error('Failed to load pizzas:', error);
+      }
+    }
+
+    async function loadDashboardData() {
+      await Promise.all([loadOrders(), loadPizzas()]);
+    }
+
+    async function updateOrderStatus(orderId, status, button) {
+      button.disabled = true;
+
+      try {
+        const response = await fetch(`${ordersApiUrl}/${orderId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-key': getAdminKey(),
+          },
+          body: JSON.stringify({ status }),
+        });
+
+        if (response.status === 401) {
+          sessionStorage.removeItem(sessionKeyName);
+          showLogin('Your admin session is no longer authorized.');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Orders API returned status ${response.status}.`);
+        }
+
+        const updatedOrder = await response.json();
+        orders = orders.map((order) => (order.id === updatedOrder.id ? updatedOrder : order));
+        renderOrders();
+        showNotification(`Order #${orderId} is now ${status}.`);
+      } catch (error) {
+        button.disabled = false;
+        showNotification(`Order #${orderId} could not be updated.`, 'error');
+        console.error('Failed to update order status:', error);
+      }
+    }
+
+    async function deleteOrder(orderId) {
+      if (!window.confirm(`Permanently delete order #${orderId}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${ordersApiUrl}/${orderId}`, {
+          method: 'DELETE',
+          headers: {
+            'x-admin-key': getAdminKey(),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Orders API returned status ${response.status}.`);
+        }
+
+        orders = orders.filter((order) => order.id !== orderId);
+        renderOrders();
+        showNotification(`Order #${orderId} was deleted.`);
+      } catch (error) {
+        showNotification(`Order #${orderId} could not be deleted.`, 'error');
+        console.error('Failed to delete order:', error);
+      }
+    }
+
+    async function deleteAllOrders() {
+      if (!window.confirm('Permanently delete every order? This action cannot be undone.')) {
+        return;
+      }
+
+      elements.deleteAllOrdersButton.disabled = true;
+
+      try {
+        const response = await fetch(ordersApiUrl, {
+          method: 'DELETE',
+          headers: {
+            'x-admin-key': getAdminKey(),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Orders API returned status ${response.status}.`);
+        }
+
+        const result = await response.json();
+        orders = [];
+        renderOrders();
+        showNotification(`${result.deleted_count} orders were permanently deleted.`);
+      } catch (error) {
+        elements.deleteAllOrdersButton.disabled = false;
+        showNotification('Orders could not be deleted.', 'error');
+        console.error('Failed to delete all orders:', error);
+      }
+    }
+
+    async function savePizza(event) {
+      event.preventDefault();
+
+      const pizzaId = elements.pizzaId.value;
+      const isEditing = Boolean(pizzaId);
+      const payload = {
+        name: elements.pizzaName.value.trim(),
+        description: elements.pizzaDescription.value.trim(),
+        price: Number(elements.pizzaPrice.value),
+        image_url: elements.pizzaImageUrl.value.trim(),
+      };
+
+      elements.savePizzaButton.disabled = true;
+      elements.pizzaFormError.classList.add('hidden');
+
+      try {
+        const response = await fetch(isEditing ? `${pizzasApiUrl}/${pizzaId}` : pizzasApiUrl, {
+          method: isEditing ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-key': getAdminKey(),
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Pizzas API returned status ${response.status}.`);
+        }
+
+        const savedPizza = await response.json();
+
+        if (isEditing) {
+          pizzas = pizzas.map((pizza) => (pizza.id === savedPizza.id ? savedPizza : pizza));
+        } else {
+          pizzas.push(savedPizza);
+          pizzas.sort((firstPizza, secondPizza) => firstPizza.id - secondPizza.id);
+        }
+
+        renderPizzas();
+        closePizzaModal();
+        showNotification(`${savedPizza.name} was ${isEditing ? 'updated' : 'created'}.`);
+      } catch (error) {
+        elements.pizzaFormError.textContent = 'The pizza could not be saved. Check all fields and try again.';
+        elements.pizzaFormError.classList.remove('hidden');
+        console.error('Failed to save pizza:', error);
+      } finally {
+        elements.savePizzaButton.disabled = false;
+      }
+    }
+
+    async function deletePizza(pizzaId) {
+      const pizza = pizzas.find((item) => item.id === pizzaId);
+
+      if (!pizza || !window.confirm(`Permanently delete ${pizza.name}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${pizzasApiUrl}/${pizzaId}`, {
+          method: 'DELETE',
+          headers: {
+            'x-admin-key': getAdminKey(),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Pizzas API returned status ${response.status}.`);
+        }
+
+        pizzas = pizzas.filter((item) => item.id !== pizzaId);
+        renderPizzas();
+        showNotification(`${pizza.name} was deleted.`);
+      } catch (error) {
+        showNotification(`${pizza.name} could not be deleted.`, 'error');
+        console.error('Failed to delete pizza:', error);
+      }
+    }
+
+    elements.loginForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const adminKey = elements.adminKey.value.trim();
+
+      if (!adminKey) {
+        return;
+      }
+
+      sessionStorage.setItem(sessionKeyName, adminKey);
+      elements.loginError.classList.add('hidden');
+      elements.loginButton.disabled = true;
+      elements.loginButton.textContent = 'Checking key...';
+      loadDashboardData();
+    });
+
+    elements.dashboardTabs.forEach((tab) => {
+      tab.addEventListener('click', () => switchPanel(tab.dataset.panel));
+    });
+    elements.refreshButton.addEventListener('click', loadDashboardData);
+    elements.deleteAllOrdersButton.addEventListener('click', deleteAllOrders);
+    elements.addPizzaButton.addEventListener('click', () => openPizzaModal());
+    elements.closePizzaModalButton.addEventListener('click', closePizzaModal);
+    elements.pizzaForm.addEventListener('submit', savePizza);
+    elements.pizzaModal.addEventListener('click', (event) => {
+      if (event.target === elements.pizzaModal) {
+        closePizzaModal();
+      }
+    });
+    elements.logoutButton.addEventListener('click', () => {
+      sessionStorage.removeItem(sessionKeyName);
+      orders = [];
+      pizzas = [];
+      showLogin();
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !elements.pizzaModal.classList.contains('hidden')) {
+        closePizzaModal();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      switchPanel('orders');
+      loadDashboardData();
+    });
+  </script>
+</body>
+</html>

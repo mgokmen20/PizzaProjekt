@@ -19,5 +19,7 @@ CREATE TABLE IF NOT EXISTS orders (
     delivery_address TEXT NOT NULL,
     items JSONB NOT NULL,
     total_price NUMERIC(6, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'Received'
+        CHECK (status IN ('Received', 'Preparing', 'Delivered', 'Cancelled')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
